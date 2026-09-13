@@ -1,6 +1,7 @@
+
 // ----- Scroll reveal -----
 (function () {
-    var reveals = document.querySelectorAll('.reveal, .reveal-fade, .reveal-line, .timeline-connector');
+    var reveals = document.querySelectorAll('.reveal, .reveal-fade, .timeline-connector');
     if ('IntersectionObserver' in window && reveals.length) {
         var observer = new IntersectionObserver(function (entries) {
             entries.forEach(function (entry) {
@@ -42,23 +43,92 @@ updateCountdown();
 setInterval(updateCountdown, 1000);
 
 // ----- RSVP form via Google Sheets (Apps Script Web App) -----
-// Replace the URL below with your own Apps Script Web App URL (see setup instructions provided separately)
-var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzM5vo5hzCgB3g3EvYCzQIuvd8k7iP0ND6vlVC-6GIekUoT4yJvvWjad70152Tko6s/exec";
+var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz7Xz6Dx7u1D_gxqZfJ8RzAkzKVwu573ocbcCWw6H5gIO2RunwQgul5DT6k90cSCdY/exec";
 
-var form = document.getElementById('rsvp-form');
-var status = document.getElementById('form-status');
+var rsvpForm = document.getElementById('rsvp-form');
+var rsvpStatus = document.getElementById('form-status');
 
-form.addEventListener('submit', function (e) {
-    e.preventDefault();
-    status.textContent = "Ուղարկվում է…";
+rsvpForm.setAttribute('action', SCRIPT_URL);
 
-    fetch(SCRIPT_URL, {
-        method: 'POST',
-        body: new FormData(form)
-    }).then(function () {
-        status.textContent = "Շնորհակալություն! Ձեր պատասխանը ստացվեց 🤍";
-        form.reset();
-    }).catch(function () {
-        status.textContent = "Չհաջողվեց ուղարկել։ Խնդրում ենք փորձել կրկին։";
-    });
+rsvpForm.addEventListener('submit', function () {
+    rsvpStatus.textContent = "Ուղարկվում է…";
+    // The actual POST is handled natively by the browser (target="hidden_iframe"),
+    // so we don't block on it — just give the guest clear, immediate feedback.
+    setTimeout(function () {
+        rsvpStatus.textContent = "Շնորհակալություն! Ձեր պատասխանը ստացվեց 🤍";
+        rsvpForm.reset();
+    }, 900);
 });
+
+// ----- Background music (starts on first scroll) -----
+(function () {
+    var YT_VIDEO_ID = 'sdTWmPMyeMo';
+    var ytPlayer = null;
+    var musicStarted = false;
+    var musicPlaying = false;
+
+    var toggleBtn = document.getElementById('music-toggle');
+    var iconOn = document.getElementById('music-icon-on');
+    var iconOff = document.getElementById('music-icon-off');
+
+    function setIcon(playing) {
+        iconOn.style.display = playing ? 'block' : 'none';
+        iconOff.style.display = playing ? 'none' : 'block';
+    }
+    setIcon(false);
+
+    // Load the YouTube IFrame API script
+    var tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    document.body.appendChild(tag);
+
+    window.onYouTubeIframeAPIReady = function () {
+        ytPlayer = new YT.Player('yt-player', {
+            height: '1',
+            width: '1',
+            videoId: YT_VIDEO_ID,
+            playerVars: {
+                autoplay: 0,
+                controls: 0,
+                disablekb: 1,
+                loop: 1,
+                playlist: YT_VIDEO_ID,
+                playsinline: 1
+            },
+            events: {
+                onStateChange: function (e) {
+                    if (e.data === YT.PlayerState.PLAYING) {
+                        musicPlaying = true;
+                        setIcon(true);
+                    } else if (e.data === YT.PlayerState.PAUSED) {
+                        musicPlaying = false;
+                        setIcon(false);
+                    }
+                }
+            }
+        });
+    };
+
+    function startMusic() {
+        if (musicStarted || !ytPlayer || typeof ytPlayer.playVideo !== 'function') return;
+        musicStarted = true;
+        try {
+            ytPlayer.playVideo();
+        } catch (err) { }
+    }
+
+    // Try to start on the first scroll (and as a fallback, first click/touch)
+    window.addEventListener('scroll', startMusic, { once: true, passive: true });
+    window.addEventListener('click', startMusic, { once: true });
+    window.addEventListener('touchstart', startMusic, { once: true, passive: true });
+
+    toggleBtn.addEventListener('click', function () {
+        if (!ytPlayer || typeof ytPlayer.playVideo !== 'function') return;
+        musicStarted = true;
+        if (musicPlaying) {
+            ytPlayer.pauseVideo();
+        } else {
+            ytPlayer.playVideo();
+        }
+    });
+})();
