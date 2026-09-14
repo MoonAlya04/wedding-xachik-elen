@@ -477,7 +477,7 @@ a {
     font-weight: 400;
     font-size: clamp(1.8rem, 5vw, 2.6rem);
     color: var(--ink);
-    margin-bottom: 2.6rem;
+    margin-bottom: 15px;
 }
 
 .countdown {
@@ -808,7 +808,6 @@ footer {
     color: var(--ink-soft);
     font-size: 0.8rem;
     letter-spacing: 0.06em;
-    background: var(--paper);
 }
 
 footer .monogram {
