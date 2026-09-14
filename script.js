@@ -1,7 +1,7 @@
 
 // ----- Scroll reveal -----
 (function () {
-    var reveals = document.querySelectorAll('.reveal, .reveal-fade, .timeline-connector');
+    var reveals = document.querySelectorAll('.reveal, .reveal-fade');
     if ('IntersectionObserver' in window && reveals.length) {
         var observer = new IntersectionObserver(function (entries) {
             entries.forEach(function (entry) {
@@ -10,11 +10,51 @@
                     observer.unobserve(entry.target);
                 }
             });
-        }, { threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
+        }, { threshold: 0.05, rootMargin: '0px 0px 0px 0px' });
         reveals.forEach(function (el) { observer.observe(el); });
     } else {
         reveals.forEach(function (el) { el.classList.add('is-visible'); });
     }
+})();
+
+// ----- Scroll-linked divider fill -----
+(function () {
+    var dividers = document.querySelectorAll('.event-divider');
+    if (!dividers.length) return;
+
+    var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduceMotion) {
+        dividers.forEach(function (el) { el.style.setProperty('--fill', '100%'); });
+        return;
+    }
+
+    var ticking = false;
+
+    function updateDividers() {
+        var vh = window.innerHeight;
+        var startLine = vh * 0.85;
+        var endLine = vh * 0.35;
+
+        dividers.forEach(function (el) {
+            var rect = el.getBoundingClientRect();
+            var progress = (startLine - rect.top) / (startLine - endLine);
+            if (progress < 0) progress = 0;
+            if (progress > 1) progress = 1;
+            el.style.setProperty('--fill', (progress * 100) + '%');
+        });
+        ticking = false;
+    }
+
+    function onScroll() {
+        if (!ticking) {
+            window.requestAnimationFrame(updateDividers);
+            ticking = true;
+        }
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    updateDividers();
 })();
 
 // ----- Countdown -----
@@ -132,3 +172,4 @@ rsvpForm.addEventListener('submit', function () {
         }
     });
 })();
+
