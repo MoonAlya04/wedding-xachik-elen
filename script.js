@@ -83,7 +83,7 @@ updateCountdown();
 setInterval(updateCountdown, 1000);
 
 // ----- RSVP form via Google Sheets (Apps Script Web App) -----
-var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz7Xz6Dx7u1D_gxqZfJ8RzAkzKVwu573ocbcCWw6H5gIO2RunwQgul5DT6k90cSCdY/exec";
+var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzpPbs-uDaYakxZMVW2wh8PV22Rm3vK5ArZpNGd3HOz6X_o95_L9j6BnJc6WnayF7k/exec";
 
 var rsvpForm = document.getElementById('rsvp-form');
 var rsvpStatus = document.getElementById('form-status');
